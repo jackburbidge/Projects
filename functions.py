@@ -22,6 +22,9 @@ class standard:
         idx = x.find('.')
         return float(x[:idx + digits + 1])
 
+
+
+
 class vector:
     '''
     Methods that take lists or arrays as inputs and returns arrays.
