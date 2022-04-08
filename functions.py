@@ -7,7 +7,7 @@ import numpy as np
 
 class standard:
     '''
-    Methods that take floats or integers as inputs.
+    Methods that take floats or integers as inputs.s
     '''
     @staticmethod
     def truncate(x, digits):
