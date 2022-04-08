@@ -7,7 +7,7 @@ import numpy as np
 
 class standard:
     '''
-    Methods that take floats or integers as inputs.s
+    Methods that take floats or integers as inputs and returns floats.
     '''
     @staticmethod
     def truncate(x, digits):
@@ -24,7 +24,7 @@ class standard:
 
 class vector:
     '''
-    Methods that take lists or arrays as inputs.
+    Methods that take lists or arrays as inputs and returns arrays.
     '''
     @staticmethod
     def truncate(x, digits):
@@ -32,5 +32,4 @@ class vector:
         A fuction that truncates a vector's objects to a given number of digits
         and returns a vector.
         '''
-
         return (np.array(x) * 10**digits).astype(int) / (10**digits)
