@@ -1,5 +1,5 @@
 '''
-A program that simulates the game of Black Jack.
+A program that simulates the game of Blackjack.
 '''
 import random
 
@@ -11,7 +11,7 @@ for i in ['H', 'D', 'C', 'S']:
     for j in ['J', 'Q', 'K', 'A']:
         deck += [i + j]
 
-# Black Jack uses a 6 Card Shoe
+# Blackjack uses a 6 Card Shoe
 shoe = deck * 6
 
 
@@ -22,28 +22,27 @@ class Hand:
 
     def value(self):
         # This doesn't work yet
-        aces = []
+        aces = 0
+        values = []
         value = 0
         for i in self.cards:
-            if i[1] == 'A':
-                aces += [True]
+            if i[1:] == 'A':
+                aces += 1
             else:
-                aces += [False]
-                if type(i) == str:
+                if i[1:] in ['J', 'Q', 'K']:
                     value += 10
                 else:
-                    value += i[1]
-        aces = sum(aces)
+                    value += int(i[1:])
 
         if aces == 0:
-            return value
+            return [value]
 
         for i in range(aces + 1):
             #aceCombos += [1*i + 11*(x-i)]
             if value + (1*i + 11*(aces - i)) <= 21:
-                newValue = value + (1*i + 11*(aces - i))
+                values += [value + (1*i + 11*(aces - i))]
 
-        return newValue
+        return values
 
 
     def bust(self):
