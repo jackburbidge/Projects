@@ -20,10 +20,9 @@ class Hand:
         self.cards = cards
         return
 
+
     def value(self):
-        # This doesn't work yet
         aces = 0
-        values = []
         value = 0
         for i in self.cards:
             if i[1:] == 'A':
@@ -37,16 +36,47 @@ class Hand:
         if aces == 0:
             return [value]
 
+        values = []
         for i in range(aces + 1):
-            #aceCombos += [1*i + 11*(x-i)]
-            if value + (1*i + 11*(aces - i)) <= 21:
-                values += [value + (1*i + 11*(aces - i))]
+            values += [value + (1*i + 11*(aces - i))]
 
         return values
 
 
+
     def bust(self):
-        if self.value() > 21:
-            return True
-        else:
-            return False
+        values = self.value()
+        busted = False
+
+        for i in values:
+            if i > 21:
+                busted = True
+
+        return busted
+
+
+
+def main():
+    input('Welcome to Blackjack. Press Enter to play.')
+    print(' ')
+
+    balance = 100           # Start with $100 balance
+    random.shuffle(shoe)    # Shuffle the shoe
+
+    while balance > 0:
+        playerHand = Hand([])
+        dealerHand = Hand([])
+        for i in range(2):
+            playerHand.cards += ([shoe.pop(0)])
+            dealerHand.cards += ([shoe.pop(0)])
+
+
+        print('Dealer cards:', dealerHand.cards[0])
+        print('''You're cards:''', playerHand.cards)
+
+        input('Would you like to hit (H), stand (S), or double down (D)? ')
+
+
+
+if __name__ == '__main__':
+    main()
