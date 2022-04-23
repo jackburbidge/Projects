@@ -11,11 +11,14 @@ for i in ['H', 'D', 'C', 'S']:
     for j in ['J', 'Q', 'K', 'A']:
         deck += [i + j]
 
-# Blackjack uses a 6 Card Shoe
+# We'll use a 6 Card Shoe
 shoe = deck * 6
 
 
 class Hand:
+    '''
+    A class for handling the dealer's and player's hands.
+    '''
     def __init__(self, cards):
         self.cards = cards
         return
@@ -43,7 +46,6 @@ class Hand:
         return values
 
 
-
     def bust(self):
         values = self.value()
         busted = False
@@ -55,26 +57,95 @@ class Hand:
         return busted
 
 
+    def highScore(self):
+        values = self.value()
+        values.sort()
+        value = 0
+
+        for i in values:
+            if i <= 21:
+                value = i
+
+        return value
+
+
 
 def main():
     input('Welcome to Blackjack. Press Enter to play.')
     print(' ')
 
-    balance = 100           # Start with $100 balance
+    balance = 500           # Player's starting balance
     random.shuffle(shoe)    # Shuffle the shoe
 
     while balance > 0:
+        # Initialize player and dealer hands
         playerHand = Hand([])
         dealerHand = Hand([])
+
+        # Deal 2 cards to player and dealer
         for i in range(2):
             playerHand.cards += ([shoe.pop(0)])
             dealerHand.cards += ([shoe.pop(0)])
 
+        handOver = False
+        stand = False
+        while not handOver:
+            bet = 0
+            while bet == 0:
+                print('Your balance is', balance)
+                bet = int(input('Please enter bet: '))
 
-        print('Dealer cards:', dealerHand.cards[0])
-        print('''You're cards:''', playerHand.cards)
+            while not stand:
+                print('\nDealer is showing:', dealerHand.cards[0])
+                print('You are showing:', playerHand.cards)
+                print('''You're current score is''', playerHand.value())
 
-        input('Would you like to hit (H), stand (S), or double down (D)? ')
+                action = str()
+                while action not in ['S', 'H', 'D']:
+                    action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
+
+                if action == 'H':
+                    playerHand.cards += ([shoe.pop(0)])
+
+                    if playerHand.bust():
+                        handOver = True
+                        balance -= bet
+
+                elif action == 'S':
+                    stand = True
+
+
+            print('Dealer is showing:', dealerHand.cards)
+            print('You are showing:', playerHand.cards)
+
+            dealerScore = dealerHand.highScore()
+            playerScore = playerHand.highScore()
+            print('''The dealer's score is''', dealerScore)
+            print('''You're score is''', playerScore)
+
+            if dealerScore > playerScore:
+                print('You lost this hand')
+                balance -= bet
+                handOver = True
+
+            elif dealerScore < playerScore:
+                print('You won this hand')
+                balance += bet
+                handOver = True
+
+            else:
+                print('You pushed')
+                handOver = True
+
+
+
+
+
+
+
+
+
+
 
 
 
