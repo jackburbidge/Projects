@@ -6,7 +6,7 @@ import random
 # Create Deck of Cards
 deck = []
 for i in ['H', 'D', 'C', 'S']:
-    for j in range(1, 11):
+    for j in range(2, 11):
         deck += [i + str(j)]
     for j in ['J', 'Q', 'K', 'A']:
         deck += [i + j]
@@ -48,11 +48,13 @@ class Hand:
 
     def bust(self):
         values = self.value()
-        busted = False
+        values.sort()
+        values = values[::-1]
+        busted = True
 
         for i in values:
-            if i > 21:
-                busted = True
+            if i <= 21:
+                busted = False
 
         return busted
 
@@ -71,7 +73,12 @@ class Hand:
 
 
 def main():
-    input('Welcome to Blackjack. Press Enter to play.')
+    print('Welcome to Blackjack.')
+    print('Blackjack pays 2 to 1.')
+    print('Insurance pays 3 to 2.')
+    print('Dealer hits until 17.')
+    print('Starting Account Balance: 500')
+    input('Press Enter to play.')
     print(' ')
 
     balance = 500           # Player's starting balance
@@ -88,31 +95,50 @@ def main():
             dealerHand.cards += ([shoe.pop(0)])
 
         handOver = False
-        stand = False
+        busted = False
         while not handOver:
             bet = 0
             while bet == 0:
                 print('Your balance is', balance)
                 bet = int(input('Please enter bet: '))
 
-            while not stand:
+            while True:
                 print('\nDealer is showing:', dealerHand.cards[0])
                 print('You are showing:', playerHand.cards)
                 print('''You're current score is''', playerHand.value())
 
                 action = str()
-                while action not in ['S', 'H', 'D']:
+                while action not in ['S', 'H', 'D', 'Sp']:
                     action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
+                    print(' ')
 
                 if action == 'H':
                     playerHand.cards += ([shoe.pop(0)])
 
                     if playerHand.bust():
-                        handOver = True
                         balance -= bet
+                        handOver = True
+                        busted = True
+                        break
+
+                elif action == 'D':
+                    bet = bet * 2
+                    playerHand.cards += ([shoe.pop(0)])
+
+                    if playerHand.bust():
+                        balance -= bet
+                        handOver = True
+                        busted = True
+
+                    break
 
                 elif action == 'S':
-                    stand = True
+                    break
+
+            if busted:
+                print('You busted.')
+                print('You lost this hand.\n')
+                break
 
 
             print('Dealer is showing:', dealerHand.cards)
@@ -123,19 +149,46 @@ def main():
             print('''The dealer's score is''', dealerScore)
             print('''You're score is''', playerScore)
 
+            dealerBust = False
+            while dealerScore <= 16:
+                dealerHand.cards += ([shoe.pop(0)])
+                print('Dealer drew a', dealerHand.cards[-1])
+                print('''Dealer's score is now''', dealerHand.value())
+
+                if dealerHand.bust():
+                    print('Dealer busted.')
+                    print('You won this hand.\n')
+                    balance += bet
+                    dealerBust = True
+                    break
+
+                dealerScore = dealerHand.highScore()
+
+
+            if dealerBust:
+                break
+
+
             if dealerScore > playerScore:
-                print('You lost this hand')
+                print('You lost this hand.')
+                print('''You're bet was''', bet, '\n')
                 balance -= bet
-                handOver = True
+                break
 
             elif dealerScore < playerScore:
-                print('You won this hand')
+                print('You won this hand.')
+                print('''You're bet was''', bet, '\n')
                 balance += bet
-                handOver = True
+                break
 
             else:
-                print('You pushed')
-                handOver = True
+                print('You pushed.')
+                print('''You're bet was''', bet, '\n')
+                break
+
+
+
+            print(' ')
 
 
 
