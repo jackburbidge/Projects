@@ -83,16 +83,16 @@ class Hand:
         return False
 
 
-    @classmethod
+    @staticmethod
     def cardValue(card):
-        if i[1:] in ['J', 'Q', 'K']:
+        if card[1:] in ['J', 'Q', 'K']:
             return 10
 
-        elif i[1:] == 'A':
+        elif card[1:] == 'A':
             return [1, 11]
 
         else:
-            return int(i[1:])
+            return int(card[1:])
 
 
 
@@ -103,7 +103,6 @@ def main():
     print('Dealer hits until 17.')
     print('Starting Account Balance: 500')
     input('Press Enter to play.')
-    print(' ')
 
     balance = 500           # Player's starting balance
     random.shuffle(shoe)    # Shuffle the shoe
@@ -115,14 +114,14 @@ def main():
 
         # Deal 2 cards to player and dealer
         for i in range(2):
-            playerHands[0].cards += ([shoe.pop(0)])
+            #playerHands[0].cards += ([shoe.pop(0)])
             dealerHand.cards += ([shoe.pop(0)])
+        playerHands[0].cards = ['S10', 'HK']
 
-        busted = False
         while True:
             bet = 0
             while bet <= 0 or type(bet) != int:
-                print('Your balance is', balance)
+                print('\nYour balance is', balance)
                 bet = input('Please enter bet: ')
                 try:
                     bet = int(bet)
@@ -130,6 +129,8 @@ def main():
                     bet = 0
 
             if dealerHand.cards[0][1:] in ['J', 'Q', 'K', 'A', '10']:
+                print('\nDealer is showing:', dealerHand.cards[0])
+
                 insurance = str()
                 while insurance not in ['Y', 'N']:
                     insurance = input('Would you like to buy insurance? ').upper()
@@ -148,7 +149,7 @@ def main():
                     if dealerHand.blackjack():
                         balance += insurance
                         print('Dealer had blackjack.')
-                        print('You lost this hand.\n')
+                        print('You lost this hand.')
                         break
 
                     else:
@@ -170,36 +171,53 @@ def main():
 
                     if len(playerHand.cards) == 1:
                         print('The dealer draws you a card.')
-                        playerHand.cards += show.pop()
+                        playerHand.cards += [shoe.pop()]
 
                     print('''You're current score is''', playerHand.value())
 
 
                     action = str()
-                    while action not in ['S', 'H', 'D', 'Sp']:
-                        action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
-                        print(' ')
+                    while action not in ['S', 'H', 'D', 'SP']:
+                        if playerHand.cardValue(playerHand.cards[-1]) == playerHand.cardValue(playerHand.cards[-2]):
+                            action = input('Would you like to hit (H), stand (S), double down (D), or split (SP)? ').upper()
+                        else:
+                            action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
+                        #print(' ')
 
-                    if action == 'Sp':
-                        playerHands += [Hand([playerHand.pop()])]
+                    if action == 'SP':
+                        playerHands += [Hand([playerHand.cards.pop()])]
                         done += [False]
                         doubled += [False]
 
                     elif action == 'H':
                         playerHand.cards += ([shoe.pop(0)])
+                        print('You drew a', playerHand.cards[-1])
+                        print('''You're score is''', playerHand.value())
 
                         if playerHand.bust():
                             balance -= bet
-                            done[i] = True
-                            doubled[i] = True
+                            #done[i] = True
+                            #doubled[i] = False
+                            playerHands.pop(i)
+                            done.pop(i)
+                            doubled.pop(i)
+                            print('You busted.')
+                            balance -= bet
                             break
 
                     elif action == 'D':
-                        bet = bet * 2
                         playerHand.cards += ([shoe.pop(0)])
 
                         if playerHand.bust():
                             balance -= bet
+                            #done[i] = True
+                            #doubled[i] = False
+                            playerHands.pop(i)
+                            done.pop(i)
+                            doubled.pop(i)
+                            print('You busted.')
+                            balance -= bet
+                            break
 
                         done[i] = True
                         doubled[i] = True
@@ -208,20 +226,21 @@ def main():
 
                     elif action == 'S':
                         done[i] = True
-                        doubled[i] = True
+                        doubled[i] = False
                         break
-
 
                 if sum(done) == len(done):
                     break
 
+            if len(playerHands) == 0:
+                break
 
             print('Dealer is showing:', dealerHand.cards)
             print('You are showing:', playerHand.cards)
 
             dealerScore = dealerHand.highScore()
             print('''The dealer's score is''', dealerScore)
-            #print('''You're score is''', playerScore)
+
 
             # If dealer's score is less than 17, draw from the deck
             dealerBust = False
@@ -232,9 +251,9 @@ def main():
 
                 if dealerHand.bust():
                     print('Dealer busted.')
-                    print('You won this hand.\n')
-                    for i in doubled:
-                        balance += bet if not doubled[i] else 2*bet
+                    print('You won this hand.')
+                    for i in range(len(playerHands)):
+                        balance += bet * (1 + doubled[i])
                     dealerBust = True
                     break
 
@@ -249,25 +268,29 @@ def main():
             for i in range(len(playerHands)):
                 playerScore = playerHands[i].highScore()
                 if dealerScore > playerScore:
+                    print('''You're score is''', playerScore)
                     print('You lost this hand.')
-                    print('''You're bet was''', bet, '\n')
-                    balance -= bet if not doubled[i] else 2*bet
+                    print('''You're bet was''', bet * (1 + doubled[i]))
+                    balance -= bet * (1 + doubled[i])
                     break
 
                 elif dealerScore < playerScore:
+                    print('''You're score is''', playerScore)
                     print('You won this hand.')
-                    print('''You're bet was''', bet, '\n')
-                    balance += bet if not doubled[i] else 2*bet
+                    print('''You're bet was''', bet * (1 + doubled[i]))
+                    balance += bet * (1 + doubled[i])
                     break
 
                 else:
+                    print('''You're score is''', playerScore)
                     print('You pushed.')
-                    print('''You're bet was''', bet, '\n')
+                    print('''You're bet was''', bet * (1 + doubled[i]))
                     break
 
+            break
 
 
-            print(' ')
+
 
 
 
