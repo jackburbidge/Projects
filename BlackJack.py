@@ -136,7 +136,21 @@ def main():
             balance -= bet
 
             if dealerHand.cards[0][1:] in ['J', 'Q', 'K', 'A', '10']:
+                print('You are showing:', playerHands[0].cards)
                 print('\nDealer is showing:', dealerHand.cards[0])
+
+                if playerHands[0].blackjack() and dealerHand.blackjack():
+                    print('You have blackjack.')
+                    print('The dealer also has blackjack.')
+
+                    break
+
+                if playerHands[0].blackjack() and not dealerHand.blackjack():
+                    print('You have blackjack.')
+                    balance += int(bet * 1.5)
+
+                    break
+
 
                 insurance = str()
                 while insurance not in ['Y', 'N']:
@@ -176,6 +190,12 @@ def main():
                         print('Dealer does not have blackjack.')
 
 
+            if playerHands[0].blackjack():
+                print('You have blackjack.')
+                balance += int(bet * 1.5)
+
+                break
+
 
             done = [False]
             doubled = [False]
@@ -195,6 +215,10 @@ def main():
                         print('Dealer is showing:', dealerHand.cards[0])
                         print('You are showing:', playerHand.cards)
                         print('''You're current score is''', playerHand.value())
+
+                        if playerHand.blackjack():
+                            print('You have 21. You must stand.')
+                            done[i] = True
 
                         action = str()
                         split = False
@@ -222,6 +246,10 @@ def main():
                                 #balance -= bet
                                 print('You busted.')
                                 busted[i] = True
+                                done[i] = True
+
+                            if playerHand.blackjack():
+                                print('You have 21. You must stand.')
                                 done[i] = True
 
 
