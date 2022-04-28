@@ -3,6 +3,8 @@ A program that simulates the game of Blackjack.
 '''
 import random
 
+
+
 # Create Deck of Cards
 deck = []
 for i in ['H', 'D', 'C', 'S']:
@@ -13,6 +15,7 @@ for i in ['H', 'D', 'C', 'S']:
 
 # We'll use a 6 Card Shoe
 shoe = deck * 6
+
 
 
 class Hand:
@@ -96,15 +99,17 @@ class Hand:
 
 
 
+
 def main():
     print('Welcome to Blackjack.')
     print('Blackjack pays 3 to 2.')
     print('Insurance pays 2 to 1.')
     print('Dealer hits until 17.')
-    print('Starting Account Balance: 500')
+    print('Starting Account Balance: 100.')
+    print('Minimum bet of 10.')
     input('Press Enter to play.')
 
-    balance = 500           # Player's starting balance
+    balance = 100           # Player's starting balance
     random.shuffle(shoe)    # Shuffle the shoe
 
     while balance > 0:
@@ -120,13 +125,15 @@ def main():
 
         while True:
             bet = 0
-            while bet <= 0 or type(bet) != int:
+            while bet < 10 or type(bet) != int or bet > balance:
                 print('\nYour balance is', balance)
                 bet = input('Please enter bet: ')
                 try:
                     bet = int(bet)
                 except:
-                    bet = 0
+                    bet = 10
+
+            balance -= bet
 
             if dealerHand.cards[0][1:] in ['J', 'Q', 'K', 'A', '10']:
                 print('\nDealer is showing:', dealerHand.cards[0])
@@ -137,19 +144,20 @@ def main():
 
                 if insurance == 'Y':
                     insurance = 0
-                    while insurance <= 0 or type(insurance) != int:
+                    while insurance <= 0 or type(insurance) != int or insurance > int(bet) / 2 or insurance > balance:
                         print('Your balance is', balance)
-                        print('Max insurance bet', int(bet / 2))
+                        print('Max insurance bet', min(int(bet / 2), balance))
                         insurance = input('Please enter insurance amount: ')
                         try:
-                            insurance = int(bet)
+                            insurance = int(insurance)
                         except:
                             insurance = 0
 
                     if dealerHand.blackjack():
                         balance += insurance
                         print('Dealer had blackjack.')
-                        print('You lost this hand.')
+                        print('You lost this hand, but your insurance paid off.')
+
                         break
 
                     else:
@@ -158,81 +166,86 @@ def main():
                         print('Your balance is', balance)
 
                 if insurance == 'N':
-                    pass
+                    if dealerHand.blackjack():
+                        print('Dealer had blackjack.')
+                        print('You lost this hand.')
+
+                        break
+
+                    else:
+                        print('Dealer does not have blackjack.')
 
 
+
+            done = [False]
+            doubled = [False]
+            busted = [False]
             while True:
-                done = [False]
-                doubled = [False]
                 for i in range(len(playerHands)):
-                    playerHand = playerHands[i]
-                    print('\nDealer is showing:', dealerHand.cards[0])
-                    print('You are showing:', playerHand.cards)
+                    while not done[i]:
+                        print(' ')
 
-                    if len(playerHand.cards) == 1:
-                        print('The dealer draws you a card.')
-                        playerHand.cards += [shoe.pop()]
+                        playerHand = playerHands[i]
 
-                    print('''You're current score is''', playerHand.value())
+                        if len(playerHand.cards) == 1:
+                            print('You are showing:', playerHand.cards)
+                            print('The dealer draws you a card.')
+                            playerHand.cards += [shoe.pop()]
+
+                        print('Dealer is showing:', dealerHand.cards[0])
+                        print('You are showing:', playerHand.cards)
+                        print('''You're current score is''', playerHand.value())
+
+                        action = str()
+                        split = False
+                        while action not in ['S', 'H', 'D', 'SP']:
+                            if playerHand.cardValue(playerHand.cards[-1]) == playerHand.cardValue(playerHand.cards[-2]) and balance >= bet:
+                                action = input('Would you like to hit (H), stand (S), double down (D), or split (SP)? ').upper()
+                                split = True
+                            else:
+                                action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
 
 
-                    action = str()
-                    while action not in ['S', 'H', 'D', 'SP']:
-                        if playerHand.cardValue(playerHand.cards[-1]) == playerHand.cardValue(playerHand.cards[-2]):
-                            action = input('Would you like to hit (H), stand (S), double down (D), or split (SP)? ').upper()
-                        else:
-                            action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
-                        #print(' ')
-
-                    if action == 'SP':
-                        playerHands += [Hand([playerHand.cards.pop()])]
-                        done += [False]
-                        doubled += [False]
-
-                    elif action == 'H':
-                        playerHand.cards += ([shoe.pop(0)])
-                        print('You drew a', playerHand.cards[-1])
-                        print('''You're score is''', playerHand.value())
-
-                        if playerHand.bust():
+                        if action == 'SP' and split:
                             balance -= bet
-                            #done[i] = True
-                            #doubled[i] = False
-                            playerHands.pop(i)
-                            done.pop(i)
-                            doubled.pop(i)
-                            print('You busted.')
-                            balance -= bet
-                            break
+                            playerHands += [Hand([playerHand.cards.pop()])]
+                            done += [False]
+                            doubled += [False]
+                            busted += [False]
 
-                    elif action == 'D':
-                        playerHand.cards += ([shoe.pop(0)])
+                        elif action == 'H':
+                            playerHand.cards += ([shoe.pop(0)])
+                            print('You drew a', playerHand.cards[-1])
+                            print('''You're score is''', playerHand.value())
 
-                        if playerHand.bust():
-                            balance -= bet
-                            #done[i] = True
-                            #doubled[i] = False
-                            playerHands.pop(i)
-                            done.pop(i)
-                            doubled.pop(i)
-                            print('You busted.')
-                            balance -= bet
-                            break
+                            if playerHand.bust():
+                                #balance -= bet
+                                print('You busted.')
+                                busted[i] = True
+                                done[i] = True
 
-                        done[i] = True
-                        doubled[i] = True
 
-                        break
+                        elif action == 'D':
+                            balance -= min(bet, balance)
+                            playerHand.cards += ([shoe.pop(0)])
+                            print('You drew a', playerHand.cards[-1])
+                            print('''You're score is''', playerHand.value())
 
-                    elif action == 'S':
-                        done[i] = True
-                        doubled[i] = False
-                        break
+                            if playerHand.bust():
+                                #balance -= bet
+                                print('You busted.')
+                                busted[i] = True
+
+                            done[i] = True
+                            doubled[i] = True
+
+                        elif action == 'S':
+                            done[i] = True
 
                 if sum(done) == len(done):
                     break
 
-            if len(playerHands) == 0:
+            if sum(busted) == len(busted):
                 break
 
             print('Dealer is showing:', dealerHand.cards)
@@ -246,15 +259,18 @@ def main():
             dealerBust = False
             while dealerScore < 17:
                 dealerHand.cards += ([shoe.pop(0)])
-                print('Dealer drew a', dealerHand.cards[-1])
+                print('Dealer drew ', dealerHand.cards[-1])
                 print('''Dealer's score is now''', dealerHand.value())
 
                 if dealerHand.bust():
                     print('Dealer busted.')
                     print('You won this hand.')
+
                     for i in range(len(playerHands)):
-                        balance += bet * (1 + doubled[i])
+                        if not busted[i]:
+                            balance += 2 * bet * (1 + doubled[i])
                     dealerBust = True
+
                     break
 
                 dealerScore = dealerHand.highScore()
@@ -266,40 +282,31 @@ def main():
 
             # Calculate who wins the hand
             for i in range(len(playerHands)):
-                playerScore = playerHands[i].highScore()
-                if dealerScore > playerScore:
-                    print('''You're score is''', playerScore)
-                    print('You lost this hand.')
-                    print('''You're bet was''', bet * (1 + doubled[i]))
-                    balance -= bet * (1 + doubled[i])
-                    break
+                if not busted[i]:
+                    playerHand = playerHands[i]
+                    playerScore = playerHand.highScore()
+                    print('\nYou are showing:', playerHand.cards)
 
-                elif dealerScore < playerScore:
-                    print('''You're score is''', playerScore)
-                    print('You won this hand.')
-                    print('''You're bet was''', bet * (1 + doubled[i]))
-                    balance += bet * (1 + doubled[i])
-                    break
+                    if dealerScore > playerScore:
+                        print('''You're score is''', playerScore)
+                        print('You lost this hand.')
+                        print('''You're bet was''', bet * (1 + doubled[i]))
+                        #balance -= bet * (1 + doubled[i])
 
-                else:
-                    print('''You're score is''', playerScore)
-                    print('You pushed.')
-                    print('''You're bet was''', bet * (1 + doubled[i]))
-                    break
+                    elif dealerScore < playerScore:
+                        print('''You're score is''', playerScore)
+                        print('You won this hand.')
+                        print('''You're bet was''', bet * (1 + doubled[i]))
+                        balance += 2 * bet * (1 + doubled[i])
+
+                    else:
+                        print('''You're score is''', playerScore)
+                        print('You pushed.')
+                        #print('''You're bet was''', bet * (1 + doubled[i]))
 
             break
 
-
-
-
-
-
-
-
-
-
-
-
+    print('\n\n\nYou lost the game.')
 
 
 
