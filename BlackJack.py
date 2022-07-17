@@ -24,10 +24,12 @@ class Hand:
     '''
     def __init__(self, cards):
         self.cards = cards
-        return
 
 
     def value(self):
+        '''
+        Returns the value of the current hands.
+        '''
         aces = 0
         value = 0
         for i in self.cards:
@@ -50,6 +52,9 @@ class Hand:
 
 
     def bust(self):
+        '''
+        Checks if the hand is a bust.
+        '''
         values = self.value()
         values.sort()
         values = values[::-1]
@@ -63,6 +68,9 @@ class Hand:
 
 
     def highScore(self):
+        '''
+        Determines the hand's highest value that is not a bust.
+        '''
         values = self.value()
         values.sort()
         value = 0
@@ -75,6 +83,9 @@ class Hand:
 
 
     def blackjack(self):
+        '''
+        Checks if the hand is a blackjack.
+        '''
         values = self.value()
         values.sort()
 
@@ -88,6 +99,9 @@ class Hand:
 
     @staticmethod
     def cardValue(card):
+        '''
+        Returns the value of a given card.
+        '''
         if card[1:] in ['J', 'Q', 'K']:
             return 10
 
@@ -117,14 +131,15 @@ def main():
         playerHands = [Hand([])]
         dealerHand = Hand([])
 
-        # Deal 2 cards to player and dealer
+        # Deal 2 cards to player and dealer. Player is dealt first.
         for i in range(2):
-            #playerHands[0].cards += ([shoe.pop(0)])
+            playerHands[0].cards += ([shoe.pop(0)])
             dealerHand.cards += ([shoe.pop(0)])
-        playerHands[0].cards = ['S10', 'HK']
 
+        # Loop ends when the player runs out of money.
         while True:
             bet = 0
+            # Basic betting boundary checks.
             while bet < 10 or type(bet) != int or bet > balance:
                 print('\nYour balance is', balance)
                 bet = input('Please enter bet: ')
@@ -133,8 +148,10 @@ def main():
                 except:
                     bet = 10
 
+            # Subtract bet amount from player's balance
             balance -= bet
 
+            # If dealer is showing a face card/ace check for blackjack and insurance.
             if dealerHand.cards[0][1:] in ['J', 'Q', 'K', 'A', '10']:
                 print('You are showing:', playerHands[0].cards)
                 print('\nDealer is showing:', dealerHand.cards[0])
