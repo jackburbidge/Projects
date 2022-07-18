@@ -84,7 +84,7 @@ class Hand:
 
     def blackjack(self):
         '''
-        Checks if the hand is a blackjack.
+        Checks if the hand is equal to 21.
         '''
         values = self.value()
         values.sort()
@@ -156,12 +156,14 @@ def main():
                 print('You are showing:', playerHands[0].cards)
                 print('\nDealer is showing:', dealerHand.cards[0])
 
+                # Both the player and the dealer have blackjack.
                 if playerHands[0].blackjack() and dealerHand.blackjack():
                     print('You have blackjack.')
                     print('The dealer also has blackjack.')
 
                     break
 
+                # The player has blackjack and the dealer does not.
                 if playerHands[0].blackjack() and not dealerHand.blackjack():
                     print('You have blackjack.')
                     balance += int(bet * 1.5)
@@ -169,10 +171,12 @@ def main():
                     break
 
 
+                # Determine if the player wants insurance.
                 insurance = str()
                 while insurance not in ['Y', 'N']:
                     insurance = input('Would you like to buy insurance? ').upper()
 
+                # The player opted for insurance.
                 if insurance == 'Y':
                     insurance = 0
                     while insurance <= 0 or type(insurance) != int or insurance > int(bet) / 2 or insurance > balance:
@@ -184,6 +188,7 @@ def main():
                         except:
                             insurance = 0
 
+                    # If the dealer has blackjack the hand is over.
                     if dealerHand.blackjack():
                         balance += insurance
                         print('Dealer had blackjack.')
@@ -191,22 +196,27 @@ def main():
 
                         break
 
+                    # If the dealer does not have blackjack we continue.
                     else:
                         balance -= insurance
                         print('Dealer does not have blackjack.')
                         print('Your balance is', balance)
 
+                # The player opted out of insurance.
                 if insurance == 'N':
+                    # If the dealer has blackjack the hand is over.
                     if dealerHand.blackjack():
                         print('Dealer had blackjack.')
                         print('You lost this hand.')
 
                         break
 
+                    # If the dealer does not have blackjack we continue.
                     else:
                         print('Dealer does not have blackjack.')
 
-
+            # If the player has blackjack and the dealer is not showing a facecard
+            # then the hand is over and the player is paid 1.5x their bet.
             if playerHands[0].blackjack():
                 print('You have blackjack.')
                 balance += int(bet * 1.5)
@@ -214,16 +224,22 @@ def main():
                 break
 
 
+            # Now that the checks for blackjacks are done normal play starts.
+            # The hand is over once the dealer busts, the player busts, or the
+            # player quits hitting.
             done = [False]
             doubled = [False]
             busted = [False]
             while True:
+                # We iterate through the players hands, which may be multiple if
+                # the player has split their hands.
                 for i in range(len(playerHands)):
                     while not done[i]:
                         print(' ')
 
                         playerHand = playerHands[i]
 
+                        # If the player has split hands, then they are forced to hit.
                         if len(playerHand.cards) == 1:
                             print('You are showing:', playerHand.cards)
                             print('The dealer draws you a card.')
@@ -233,20 +249,25 @@ def main():
                         print('You are showing:', playerHand.cards)
                         print('''You're current score is''', playerHand.value())
 
+                        # If the player has blackjack, they must stand.
                         if playerHand.blackjack():
                             print('You have 21. You must stand.')
                             done[i] = True
 
+                        # Determine what the player wants to do with their hand.
                         action = str()
                         split = False
                         while action not in ['S', 'H', 'D', 'SP']:
+                            # The player can split if the cards they are showing
+                            # are the same. Otherwise they cannot.
                             if playerHand.cardValue(playerHand.cards[-1]) == playerHand.cardValue(playerHand.cards[-2]) and balance >= bet:
                                 action = input('Would you like to hit (H), stand (S), double down (D), or split (SP)? ').upper()
                                 split = True
                             else:
                                 action = input('Would you like to hit (H), stand (S), or double down (D)? ').upper()
 
-
+                        # If the player chose to split, they are now playing
+                        # two hands.
                         if action == 'SP' and split:
                             balance -= bet
                             playerHands += [Hand([playerHand.cards.pop()])]
@@ -254,22 +275,25 @@ def main():
                             doubled += [False]
                             busted += [False]
 
+                        # If the player chose to hit, they are given another card.
                         elif action == 'H':
                             playerHand.cards += ([shoe.pop(0)])
                             print('You drew a', playerHand.cards[-1])
                             print('''You're score is''', playerHand.value())
 
+                            # If the player busted, this hand is over.
                             if playerHand.bust():
-                                #balance -= bet
                                 print('You busted.')
                                 busted[i] = True
                                 done[i] = True
 
+                            # If the player has 21, they must stand.
                             if playerHand.blackjack():
                                 print('You have 21. You must stand.')
                                 done[i] = True
 
-
+                        # If the player doubles down they get another card and
+                        # they are not allowed to hit again.
                         elif action == 'D':
                             balance -= min(bet, balance)
                             playerHand.cards += ([shoe.pop(0)])
@@ -277,7 +301,6 @@ def main():
                             print('''You're score is''', playerHand.value())
 
                             if playerHand.bust():
-                                #balance -= bet
                                 print('You busted.')
                                 busted[i] = True
 
