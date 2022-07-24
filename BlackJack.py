@@ -307,12 +307,16 @@ def main():
                             done[i] = True
                             doubled[i] = True
 
+                        # If the player decides to stand, we stop player action.
                         elif action == 'S':
                             done[i] = True
 
+                # If all hands are done taking action, we can exit this loop
+                # and move on to determining winners of the hand.
                 if sum(done) == len(done):
                     break
 
+            # If all of the players hands have busted, the round is over.
             if sum(busted) == len(busted):
                 break
 
@@ -323,17 +327,20 @@ def main():
             print('''The dealer's score is''', dealerScore)
 
 
-            # If dealer's score is less than 17, draw from the deck
+            # If dealer's score is less than 17, draw from the deck.
             dealerBust = False
             while dealerScore < 17:
                 dealerHand.cards += ([shoe.pop(0)])
                 print('Dealer drew ', dealerHand.cards[-1])
                 print('''Dealer's score is now''', dealerHand.value())
 
+                # If the dealer busts, the player wins all of its hands.
                 if dealerHand.bust():
                     print('Dealer busted.')
                     print('You won this hand.')
 
+                    # Iterate through the players hands to add bets to their
+                    # cash balance.
                     for i in range(len(playerHands)):
                         if not busted[i]:
                             balance += 2 * bet * (1 + doubled[i])
@@ -343,34 +350,37 @@ def main():
 
                 dealerScore = dealerHand.highScore()
 
-            # If dealer busted, we exit the loop
+            # If dealer busted, the round is over.
             if dealerBust:
                 break
 
 
-            # Calculate who wins the hand
+            # Calculate who wins the hand, since we know the dealer didn't bust.
             for i in range(len(playerHands)):
                 if not busted[i]:
                     playerHand = playerHands[i]
                     playerScore = playerHand.highScore()
                     print('\nYou are showing:', playerHand.cards)
 
+                    # The player's hand lost to the dealer's.
                     if dealerScore > playerScore:
                         print('''You're score is''', playerScore)
                         print('You lost this hand.')
                         print('''You're bet was''', bet * (1 + doubled[i]))
-                        #balance -= bet * (1 + doubled[i])
 
+                    # The player's hand beat the dealer's
                     elif dealerScore < playerScore:
                         print('''You're score is''', playerScore)
                         print('You won this hand.')
                         print('''You're bet was''', bet * (1 + doubled[i]))
                         balance += 2 * bet * (1 + doubled[i])
 
+                    # If the player and dealer tie, the player gets its bet back.
                     else:
                         print('''You're score is''', playerScore)
                         print('You pushed.')
-                        #print('''You're bet was''', bet * (1 + doubled[i]))
+                        print('''You're bet was''', bet * (1 + doubled[i]))
+                        balance += bet * (1 + doubled[i])
 
             break
 
