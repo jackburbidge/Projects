@@ -82,7 +82,7 @@ class Hand:
         return value
 
 
-    def blackjack(self):
+    def twentyOne(self):
         '''
         Checks if the hand is equal to 21.
         '''
@@ -157,14 +157,14 @@ def main():
                 print('\nDealer is showing:', dealerHand.cards[0])
 
                 # Both the player and the dealer have blackjack.
-                if playerHands[0].blackjack() and dealerHand.blackjack():
+                if playerHands[0].twentyOne() and dealerHand.twentyOne():
                     print('You have blackjack.')
                     print('The dealer also has blackjack.')
 
                     break
 
                 # The player has blackjack and the dealer does not.
-                if playerHands[0].blackjack() and not dealerHand.blackjack():
+                if playerHands[0].twentyOne() and not dealerHand.twentyOne():
                     print('You have blackjack.')
                     balance += int(bet * 1.5)
 
@@ -174,7 +174,7 @@ def main():
                 # Determine if the player wants insurance.
                 insurance = str()
                 while insurance not in ['Y', 'N']:
-                    insurance = input('Would you like to buy insurance? ').upper()
+                    insurance = input('Would you like to buy insurance? (Y/N) ').upper()
 
                 # The player opted for insurance.
                 if insurance == 'Y':
@@ -189,7 +189,7 @@ def main():
                             insurance = 0
 
                     # If the dealer has blackjack the hand is over.
-                    if dealerHand.blackjack():
+                    if dealerHand.twentyOne():
                         balance += insurance
                         print('Dealer had blackjack.')
                         print('You lost this hand, but your insurance paid off.')
@@ -205,7 +205,7 @@ def main():
                 # The player opted out of insurance.
                 if insurance == 'N':
                     # If the dealer has blackjack the hand is over.
-                    if dealerHand.blackjack():
+                    if dealerHand.twentyOne():
                         print('Dealer had blackjack.')
                         print('You lost this hand.')
 
@@ -217,7 +217,7 @@ def main():
 
             # If the player has blackjack and the dealer is not showing a facecard
             # then the hand is over and the player is paid 1.5x their bet.
-            if playerHands[0].blackjack():
+            if playerHands[0].twentyOne():
                 print('You have blackjack.')
                 balance += int(bet * 1.5)
 
@@ -250,7 +250,7 @@ def main():
                         print('''You're current score is''', playerHand.value())
 
                         # If the player has blackjack, they must stand.
-                        if playerHand.blackjack():
+                        if playerHand.twentyOne():
                             print('You have 21. You must stand.')
                             done[i] = True
 
@@ -288,7 +288,7 @@ def main():
                                 done[i] = True
 
                             # If the player has 21, they must stand.
-                            if playerHand.blackjack():
+                            if playerHand.twentyOne():
                                 print('You have 21. You must stand.')
                                 done[i] = True
 
